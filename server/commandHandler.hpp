@@ -3,8 +3,18 @@
 #include "bass/bass.h"
 #include "getBassError.hpp"
 #include "bassJointAudioStream.hpp"
+#include "urlEncode.hpp"
+#include "filePicker.hpp"
 
-void handleCommand(std::string command){
+bool stringBeginsWith(std::string s, std::string subs){
+	if(s.length() < subs.length()){
+		return(false);
+	}
+	return(s.substr(0, subs.length()) == subs);
+}
+
+void handleCommand(std::string c){
+	std::string command = urlDecode(c);
 	if(command == "play"){
 		std::cout<<"playing";
 		//stream = BASS_StreamCreateFile(false, (void*)"test.wav", 0, 0, BASS_STREAM_AUTOFREE);
@@ -18,6 +28,14 @@ void handleCommand(std::string command){
 		//BASS_ChannelPause(stream);
 		//getBassError();
 		que.stop();
+	}else if(command == "skip"){
+		que.skip();
+	}else if(stringBeginsWith(command, "navigateDirectory")){
+		std::string file = command.substr(17, command.length()-17);
+		fileSelect.navigateDirectory(file);
+	}else if(stringBeginsWith(command, "addFile")){
+		std::string file = command.substr(7, command.length()-7);
+		que.addTrack(new mediaFile(file));
 	}else{
 		std::cout<<"Unknown command!"<<std::endl;
 	}

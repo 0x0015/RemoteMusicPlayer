@@ -15,6 +15,6 @@ public:
 	mediaFile(){}
 	mediaFile(std::string f){
 		filename = f;
-		name = filename;
+		name = f;
 	}
 };

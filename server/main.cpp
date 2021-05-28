@@ -8,6 +8,8 @@
 #include "bassPlugins.hpp"
 #include "bassJointAudioStream.hpp"
 #include "index.hpp"
+#include "HTMLmods/queHTML.hpp"
+#include "HTMLmods/addMediaHTML.hpp"
 
 bool running;
 std::thread updateThread;
@@ -16,9 +18,12 @@ int main() {
     BASS_Init(-1, 44100, 0, 0, 0);
     loadPlugins();
     que = audioQue();
+    fileSelect = filePicker();
     que.addTrack(new mediaFile("V01D.mp3"));
     running = true;
     updateThread = std::thread(queUpdate, &running);
+    addQueHtmlMod();
+    addSelectHtmlMod();
     //HSTREAM stream;
     // create the server object
     auto server = rs::httpserver::HttpServer::Create("0.0.0.0", 10024);
@@ -35,7 +40,7 @@ int main() {
 
     router.Add("GET", "/index.html", [](rs::httpserver::request_ptr, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
         auto& stream = response->setContentType("text/html").getResponseStream();
-	std::string fileContents = getIndex();
+	std::string fileContents = indexHTML.getIndex();
         char* lorem = new char[fileContents.length() + 1];
 	strcpy(lorem, fileContents.c_str());
 	lorem[fileContents.length()+1] = 0;

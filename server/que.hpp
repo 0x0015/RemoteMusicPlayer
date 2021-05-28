@@ -5,6 +5,7 @@
 #include <vector>
 #include "bassJointAudioStream.hpp"
 #include <unistd.h>
+#include "index.hpp"
 //#include <chrono>
 
 class audioQue{
@@ -37,6 +38,7 @@ public:
 		if(playing == 0){
 			return;
 		}
+		BASS_ChannelStop(stream);
 		backlist.push_back(playing);
 		if(media.size() < 1){
 			playing = 0;
@@ -44,6 +46,9 @@ public:
 		}
 		playing = media[0];
 		media.erase(media.begin());
+		if(playing == 0){
+			return;
+		}
 		playing->initialize();
 		playing->load();
 		BASS_ChannelPlay(stream, false);
@@ -54,10 +59,12 @@ public:
 		//double position = BASS_ChannelBytes2Seconds(stream, positionBytes);
 		auto activity = BASS_ChannelIsActive(stream);
 		if(activity == BASS_ACTIVE_STOPPED){
+			std::cout<<"Song stopped.  checking que"<<std::endl;
 			if(playing != 0){
 				backlist.push_back(playing);
 			}
 			if(media.size() < 1){
+				std::cout<<"No more media"<<std::endl;
 				playing = 0;
 				return;
 			}
@@ -75,7 +82,6 @@ public:
 		media.insert(media.begin()+position, track);
 	}
 	audioQue(){
-
 	}
 };
 
@@ -83,7 +89,7 @@ audioQue que;
 
 void queUpdate(bool* running){
 	while(*running){
-		std::cout<<"update"<<std::endl;
+		//std::cout<<"update"<<std::endl;
 		que.update();
 		unsigned int microsecond = 1000000;
 		usleep(microsecond/8);		
